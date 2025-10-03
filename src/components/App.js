@@ -1,11 +1,11 @@
-
-import React,{useEffect,useState} from "react";
-import './../styles/App.css';
+import "regenerator-runtime/runtime";
+import React, { useEffect, useState } from "react";
+import "./../styles/App.css";
 
 const App = () => {
-  const [data, setData] = useState(null); // store fetched data
-  const [loading, setLoading] = useState(true); // loading state
-  const [error, setError] = useState(null); // error state
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -15,7 +15,13 @@ const App = () => {
           throw new Error("Failed to fetch data");
         }
         const json = await res.json();
-        setData(json);
+
+        // if API has products
+        if (json && json.products && json.products.length > 0) {
+          setData(json);
+        } else {
+          setData(null);
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -24,22 +30,13 @@ const App = () => {
     };
 
     fetchData();
-  }, []); // run once on mount
+  }, []);
 
-  if (loading) {
-    return <p>Loading data...</p>;
-  }
+  if (loading) return <p>Loading data...</p>;
+  if (error) return <p>Error: {error}</p>;
+  if (!data) return <p>No data found</p>;
 
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
+  return <pre>{JSON.stringify(data, null, 2)}</pre>;
+};
 
-  return (
-    <div>
-      <h2>Fetched Data:</h2>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </div>
-  );
-}
-
-export default App
+export default App;
