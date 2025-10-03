@@ -11,17 +11,10 @@ const App = () => {
     const fetchData = async () => {
       try {
         const res = await fetch("https://dummyjson.com/products");
-        if (!res.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const json = await res.json();
+        if (!res.ok) throw new Error("Failed to fetch data");
 
-        // if API has products, store them
-        if (json && json.products && json.products.length > 0) {
-          setData(json.products);
-        } else {
-          setData([]); // empty array case
-        }
+        const json = await res.json();
+        setData(json.products || []); // store only products
       } catch (err) {
         setError(err.message);
       } finally {
@@ -33,15 +26,11 @@ const App = () => {
   }, []);
 
   if (loading) return <p>Loading data...</p>;
-  if (error) return <p>An error occurred: {error}</p>;
-  if (Array.isArray(data) && data.length === 0) return <pre>[]</pre>;
+  if (error) return <p>Error: {error}</p>;
+  if (!data || data.length === 0) return <pre>[]</pre>;
 
-  return (
-    <div>
-      <h2>Data Fetched from API</h2>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </div>
-  );
+  // print exactly the products array
+  return <pre>{JSON.stringify(data, null, 2)}</pre>;
 };
 
 export default App;
