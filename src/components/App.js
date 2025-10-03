@@ -16,11 +16,11 @@ const App = () => {
         }
         const json = await res.json();
 
-        // if API has products
+        // if API has products, store them
         if (json && json.products && json.products.length > 0) {
-          setData(json);
+          setData(json.products);
         } else {
-          setData(null);
+          setData([]); // empty array case
         }
       } catch (err) {
         setError(err.message);
@@ -33,10 +33,15 @@ const App = () => {
   }, []);
 
   if (loading) return <p>Loading data...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (!data) return <p>No data found</p>;
+  if (error) return <p>An error occurred: {error}</p>;
+  if (Array.isArray(data) && data.length === 0) return <pre>[]</pre>;
 
-  return <pre>{JSON.stringify(data, null, 2)}</pre>;
+  return (
+    <div>
+      <h2>Data Fetched from API</h2>
+      <pre>{JSON.stringify(data, null, 2)}</pre>
+    </div>
+  );
 };
 
 export default App;
