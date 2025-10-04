@@ -1,52 +1,47 @@
-import React, { useEffect, useState } from "react";
-import "./../styles/App.css";
+import React, { useState, useEffect } from 'react';
 
-const App = () => {
+function App() {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true); // Optional: for loading state
+  const [error, setError] = useState(null);     // Optional: for error handling
 
   useEffect(() => {
+    let isMounted = true; // Avoids setting state if the component is unmounted
     const fetchData = async () => {
       try {
-        // Instead of hitting external API directly,
-        // mock the response for Cypress reliability
-        const res = await fetch("https://dummyjson.com/products");
-        if (!res.ok) {
-          throw new Error("Failed to fetch data");
+        setLoading(true);
+        const response = await fetch('https://dummyjson.com/products');
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
         }
-        const json = await res.json();
-
-        // handle no products case
-        setData(json.products || []);
+        const json = await response.json();
+        if (isMounted) {
+          setData(json);
+        }
       } catch (err) {
-        setError(err.message);
+        if (isMounted) {
+          setError(err.message);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
+    return () => {
+      isMounted = false; // Clean-up flag in case the component unmounts
+    };
   }, []);
 
-  if (loading) return <p>Loading data...</p>;
-
-  if (error) {
-    // Cypress test looks for this exact text
-    return <p>An error occurred: {error}</p>;
-  }
-
-  if (!data || data.length === 0) {
-    // Cypress test looks for this exact text
-    return <p>No data found</p>;
-  }
-
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
   return (
-    <div>
-      <h2>Data Fetched from API</h2>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-    </div>
+    <pre>
+      {data ? JSON.stringify(data, null, 2) : 'No data found.'}
+    </pre>
   );
-};
+}
 
 export default App;
