@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import 'regenerator-runtime/runtime';
 
 function App() {
   const [data, setData] = useState(null);
